@@ -6,8 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Mapper
+//@Mapper
 public interface GisMapper {
 
     List<Gis> queryZhcqName(Gis gis);
+    List<Gis> queryIpoleAppSystem();
 }

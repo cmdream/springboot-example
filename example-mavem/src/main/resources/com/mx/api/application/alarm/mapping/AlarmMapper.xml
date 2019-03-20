@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mx.api.application.alarm.mapping.AlarmMapper">
+	<!-- p_code详情 -->
+	<select id="queryCodeDetail" parameterType="java.lang.String" resultType="com.mx.api.application.alarm.model.Alarm">
+		SELECT
+			detail_code detailCode,
+			comment
+		FROM
+			ipole_uc_code_detail d
+		WHERE
+			d.class_code = #{code}
+	</select>
+	<!-- 查询城市所有智慧城区 -->
+	<select id="queryZhcqList" parameterType="com.mx.api.application.alarm.model.Alarm" resultType="com.mx.api.application.alarm.model.Alarm">
+		SELECT
+			zhcq,
+			zhcqmc,
+			zhcqjc,
+			xzqh,
+			cqh,
+			bz,
+			cqlx
+		FROM
+			ipole_zhcq
+		WHERE
+			xzqh = #{xzqh}
+	</select>
+ 	<!-- 查询城区下的所有业务 -->
+ 	<select id="querySystemByZhcq" parameterType="com.mx.api.application.alarm.model.Alarm" resultType="com.mx.api.application.alarm.model.Alarm">
+ 		SELECT
+			system_id systemId
+		FROM
+			ipole_mc_event_set
+		WHERE
+			zhcq = #{zhcq}
+		GROUP BY
+			system_id
+ 	</select>
+
+</mapper>

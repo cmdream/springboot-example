@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mx.api.application.gis.mapping.GisMapper">
+    <!-- 查询所有智慧城区信息 -->
+    <select id="queryZhcqName" parameterType="com.mx.api.application.gis.model.Gis"  resultType="com.mx.api.application.gis.model.Gis">
+        SELECT
+        zhcq,
+        zhcqmc,
+        zhcqjc,
+        ifnull(jd2, '') jd,
+        ifnull(wd2, '') wd,
+        cqlx
+        FROM
+        ipole_zhcq
+        WHERE
+        cqlx = #{cqlx}
+        <if test="null != xzqh and '' != xzqh">
+            AND	xzqh = #{xzqh}
+        </if>
+    </select>
+
+    <select id="queryIpoleAppSystem" parameterType="com.mx.api.application.gis.model.Gis" resultType="com.mx.api.application.gis.model.Gis">
+        select system_id systemId from ipole_app_system
+    </select>
+</mapper>

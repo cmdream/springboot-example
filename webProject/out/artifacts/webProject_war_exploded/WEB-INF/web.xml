@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+    <!-- display-name元素提供GUI工具可能会用来标记这个特定的Web应用的一个名称。 -->
+    <display-name>webProject</display-name>
+
+    <servlet>
+        <servlet-name>anotherController</servlet-name>
+        <servlet-class>controller.AnotherServletController</servlet-class>
+        <!--<load-on-startup>0</load-on-startup>-->
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>anotherController</servlet-name>
+        <url-pattern>/anotherController</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>userController</servlet-name>
+        <servlet-class>controller.UserController</servlet-class>
+        <!--<load-on-startup>1</load-on-startup>-->
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>userController</servlet-name>
+        <url-pattern>/userController</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>demoTwoController</servlet-name>
+        <servlet-class>controller.DemoTwoController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>demoTwoController</servlet-name>
+        <url-pattern>/demoTwoController</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>operationServletController</servlet-name>
+        <servlet-class>controller.OperationServletController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>operationServletController</servlet-name>
+        <url-pattern>/operationServletController</url-pattern>
+    </servlet-mapping>
+</web-app>

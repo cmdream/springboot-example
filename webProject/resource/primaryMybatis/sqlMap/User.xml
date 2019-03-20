@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace:命名空间，对statement的信息进行分类管理 -->
+<mapper namespace="test">
+<!-- select:表示一个MappedStatement对象 
+	id：Statement的唯一标识
+	#{}：表示一个占位符
+	${id}：id表示输入参数的参数名称，如果该参数是简单类型，那么#{}里面的参数名称可以任意
+	parameterType:输入参数的Java类型
+	resultType：:输出结果所映射的Java类型（单条结果所对应的Java类型）
+-->
+	<!-- 写sql -->
+	<!--
+	resultType：指的就是返回值的类型
+				三种：pojo,简单类型，map(不建议)
+				
+	  -->
+	<select id="findAll" resultType="com.baidu.pojo.User" >
+		select * from user
+	</select>
+	<select id="findUserById" parameterType="int" resultType="com.baidu.pojo.User">
+		select * from user where id=#{id}
+	</select>
+	<select id="count" resultType="int">
+		select count(*) from user
+	</select>
+		<!-- 传递参数 
+		parameterType：简单类型，pojo,map（不建议）
+		
+		通过错误演示能理解两个东西：${id}是回去寻找getXX方法的，int：Integer___>pojo
+		${}：简单类型：#{value},字符串的拼接,并且可以通过ognl表达式取值，不常用
+		#{}：简单类型：#{可以随意些}，pojo   问号传参的方式
+		
+		那是不是说明sql传入参数会很局限？不会
+	-->
+	<select id="getMohu" resultType="com.baidu.pojo.User" parameterType="string">
+		select * from user where name like '%${value}%'
+	</select>
+	<select id="getUserById" resultType="user" parameterType="user">
+		select * from user where id=${id}
+	</select>
+	<select id="getUserById1" resultType="com.baidu.pojo.User" parameterType="int">
+		select * from user where id=#{id}
+	</select>
+	<select id="getUserListWithPage" resultType="com.baidu.pojo.User" parameterType="com.baidu.vo.UserVoi">
+		select * from user limit #{startPage},#{pageSize}
+	</select>
+	<!-- 到此为止：
+		select查询关乎三样东西：
+		1.sql
+		2.parameterType:简单类型，pojo,map(不建议)
+		3.resultType:简单类型，pojo(不管你返回单个对象还是一个集合类型，type类型只写pojo的类型，
+			局限性，colume  property保持一致)，resultMap
+	 -->
+	<delete id="deleteById"  parameterType="int">
+		delete from user where id=#{id}
+	</delete>
+	<update id="updateById"  parameterType="user">
+		update user set name=#{name},age=#{age},password=#{password} where id=#{id}
+	</update>
+	<!-- 添加 
+		怎么返回主键？不需要resulttype
+		介绍两种方式:
+		1.useGeneratedKeys="true" keyProperty="pid"   要求使用的是数据库的自增方式
+		2.<selectKey keyProperty="pid" order="AFTER" resultType="int">
+			SELECT LAST_INSERT_ID()
+			</selectKey>
+	-->
+	<insert id="insertUser"  parameterType="user" keyProperty="id" useGeneratedKeys="true">
+		insert into user set name=#{name},age=#{age},password=#{password} 
+	</insert>
+	<insert id="insertUser1" parameterType="user">
+		<selectKey resultType="int" keyProperty="id" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into user set name=#{name},age=#{age},password=#{password}
+	</insert>
+</mapper>

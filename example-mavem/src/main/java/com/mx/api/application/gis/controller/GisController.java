@@ -46,7 +46,7 @@ public class GisController {
         return config.getSSO_SERVER_URL();
     }
 
-    @ApiOperation("3.查询智慧城区")
+    @ApiOperation("3.参数是字符串，查询智慧城区")
     @GetMapping("/queryZhcqName")
     public String queryZhcqName(@RequestParam String xzqh,@RequestParam String cqlx) {
         Gis gis = new Gis();
@@ -55,5 +55,29 @@ public class GisController {
         List<Gis> gisList = gisService.queryZhcqName(gis);
         return BaseController.renderNewJson(200, "ok", gisList);
     }
+    @ApiOperation("4.参数是model，查询智慧城区")
+    @GetMapping("/queryZhcqNameTest")
+    public String queryZhcqNameTest(@ModelAttribute Gis gis) {
+//        Gis gis = new Gis();
+//        gis.setXzqh(xzqh);
+//        gis.setCqlx(cqlx);
+        List<Gis> gisList = gisService.queryZhcqName(gis);
+        return BaseController.renderNewJson(200, "ok", gisList);
+    }
+    @ApiOperation("4.统一异常处理测试")
+    @GetMapping("/exceptionTest")
+    public String exceptionTest(@RequestParam String id) throws Exception {
+        if(null == id) {
+            throw new Exception();
+        }
+
+        return "exception";
+    }
+    @ApiOperation("5.app-system")
+    @GetMapping("/queryIpoleAppSystem")
+    public String queryIpoleAppSystem() {
+        return gisService.queryIpoleAppSystem();
+    }
+
 
 }

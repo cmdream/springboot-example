@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mx.api.application.alarm.mapping.AlarmMapper">
+	<!-- p_code详情 -->
+	<select id="queryCodeDetail" parameterType="String" resultType="Alarm">
+		SELECT
+			detail_code detailCode,
+			comment
+		FROM
+			ipole_uc_code_detail d
+		WHERE
+			d.class_code = #{code}
+	</select>
+	<!-- 查询城市所有智慧城区 -->
+	<select id="queryZhcqList" parameterType="Alarm" resultType="Alarm">
+		SELECT
+			zhcq,
+			zhcqmc,
+			zhcqjc,
+			xzqh,
+			cqh,
+			bz,
+			cqlx
+		FROM
+			ipole_zhcq
+		WHERE
+			xzqh = #{xzqh}
+	</select>
+ 	<!-- 查询城区下的所有业务 -->
+ 	<select id="querySystemByZhcq" parameterType="Alarm" resultType="Alarm">
+ 		SELECT
+			system_id systemId
+		FROM
+			ipole_mc_event_set
+		WHERE
+			zhcq = #{zhcq}
+		GROUP BY
+			system_id
+ 	</select>
+ 	<!-- 查询业务下的所有预警事件 -->
+ 	<select id="queryEventDetail" parameterType="Alarm" resultType="Alarm">
+	 	SELECT
+			CASE b.system_id
+			WHEN #{systemId} THEN
+				b.system_id
+			ELSE
+				''
+			END systemId,
+			ifnull(b.event_level, '') eventLevel,
+			a.event_type eventType,
+			a.event_name eventDescription
+		FROM
+			ipole_mc_event a
+		LEFT JOIN ipole_mc_event_set b ON b.event_type = a.event_type
+		WHERE
+			a.app_id = #{systemId}
+ 	</select>
+ 	<!-- 查询某一城区下某一业务的预警等级 -->
+ 	<select id="queryEventLevelBySystemId" parameterType="Alarm" resultType="Alarm">
+ 		SELECT
+ 			zhcq,
+ 			system_id systemId,
+			event_level eventLevel
+		FROM
+			ipole_mc_event_set
+		WHERE 1=1
+		<if test="null != zhcq and '' != zhcq">
+			AND	zhcq = #{zhcq}
+		</if>
+		<if test="null != systemId and '' != systemId">
+			AND system_id = #{systemId}
+		</if>
+		GROUP BY
+			event_level
+ 	</select>
+    <!-- 查询城区下某一业务的某一预警等级下的具体预警信息 -->
+    <select id="querySubscribeEventType" parameterType="Alarm" resultType="Alarm">
+    	SELECT
+    		zhcq,
+			system_id systemId,
+			event_type eventType,
+			event_description eventDescription,
+			event_level eventLevel
+			<!-- CASE event_level
+			WHEN 1 THEN
+				'红色预警事件'
+			WHEN 2 THEN
+				'橙色预警事件'
+			WHEN 3 THEN
+				'黄色预警事件'
+			ELSE
+				'蓝色预警事件'
+			END eventLevelName -->
+		FROM
+			ipole_mc_event_set
+		WHERE
+			zhcq = #{zhcq}
+		AND system_id = #{systemId}
+		AND event_level = #{eventLevel}
+    </select>
+    <!-- 模糊查询人员信息 - 人员名称 || 发送方式 -->
+    <select id="queryUserByEventType" parameterType="Alarm" resultType="Alarm">
+    	SELECT
+			a.zhcq,
+			a.user_id userId,
+			if(b.user_id is null, a.user_id, b.name) userName,
+			ifnull(c.org_id, '') orgId,
+			if(b.user_id is null, '临时添加人员', c.org_name) orgName,
+			a.event_type eventType,
+			GROUP_CONCAT(
+				CONCAT_WS(':',a.send_mode,a.contact_information)
+				ORDER BY
+					d.detail_code SEPARATOR '|'
+			) information,
+			GROUP_CONCAT(
+				DISTINCT d.comment
+				ORDER BY
+					d.detail_code SEPARATOR '|'
+			) sendMode
+		FROM
+			ipole_mc_set a
+		LEFT JOIN ipole_uc_user b ON b.user_id = a.user_id
+		LEFT JOIN ipole_uc_org c ON c.org_id = b.company
+		LEFT JOIN ipole_uc_code_detail d ON d.detail_code = a.send_mode
+		WHERE
+			a.zhcq = #{zhcq}
+		AND d.class_code = #{code}
+		AND a.event_type = #{eventType}
+		<if test="null != userId and '' != userId">
+			AND a.user_id = #{userId}
+		</if>
+		<if test="null != userName and '' != userName">
+			AND (b.name LIKE CONCAT('%', #{userName}, '%')
+			OR a.user_id LIKE CONCAT('%', #{userName}, '%'))
+		</if>
+		<if test="null != sendMode and '' != sendMode">
+			AND a.sendMode LIKE CONCAT('%', #{sendMode}, '%')
+		</if>
+		GROUP BY
+			a.user_id
+    </select>
+    <!-- 查询人员发送方式和联系信息 -->
+    <select id="queryUserInformation" parameterType="Alarm" resultType="Alarm">
+    	SELECT
+			a.send_mode sendMode,
+			b.comment comment,
+			a.contact_information information
+		FROM
+			ipole_mc_set a
+		LEFT JOIN ipole_uc_code_detail b ON b.detail_code = a.send_mode
+		WHERE
+			a.zhcq = #{zhcq}
+		AND a.user_id = #{userId}
+		AND a.event_type = #{eventType}
+		AND b.class_code = #{code}
+    </select>
+    <!-- 删除消息配置的用户信息 -->
+    <delete id="deleteMessageConfig" parameterType="Alarm">
+    	DELETE
+		FROM
+			ipole_mc_set
+		WHERE
+			zhcq = #{zhcq}
+		AND event_type = #{eventType}
+		AND user_id = #{userId} 
+    </delete>
+    <!-- 新增消息配置表的用户信息 -->
+    <insert id="saveMessageConfig" parameterType="Alarm">
+    	insert into ipole_mc_set values(#{eventType},#{zhcq},#{userId},#{sendMode},#{information})
+    </insert>
+    <!-- 删除事件定制表中的，业务下的事件 -->
+    <delete id="deleteEventCustomization" parameterType="Alarm">
+    	DELETE
+    	FROM
+    		ipole_mc_event_set
+    	WHERE
+    		zhcq = #{zhcq}
+    	AND system_id = #{systemId}
+    </delete>
+    <!-- 新增事件定制表中的，业务下的事件 -->
+    <insert id="saveEventCustomization" parameterType="Alarm">
+    	insert into ipole_mc_event_set values(#{systemId},#{eventType},#{zhcq},#{eventDescription},#{eventLevel},#{remarks},#{eventName})
+    </insert>
+    <!-- 查询人员信息，从user表 -->
+    <select id="queryForUserSelect" parameterType="Alarm" resultType="Alarm">
+    	SELECT
+			a.user_id userId,
+			a.name userName,
+			a.company orgId,
+			b.org_name orgName
+		FROM
+			ipole_uc_user a
+		LEFT JOIN ipole_uc_org b ON b.org_id = a.company
+		WHERE
+			a.name = #{userName}
+    </select>
+</mapper>

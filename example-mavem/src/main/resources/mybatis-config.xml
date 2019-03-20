@@ -7,6 +7,7 @@
             <typeAlias type="java.lang.Integer" alias="Integer"/>
             <typeAlias type="java.lang.String" alias="String"/>
             <typeAlias type="com.mx.api.application.gis.model.Gis" alias="Gis"/>
+            <typeAlias type="com.mx.api.application.alarm.model.Alarm" alias="Alarm"/>
         </typeAliases>
 
 </configuration>

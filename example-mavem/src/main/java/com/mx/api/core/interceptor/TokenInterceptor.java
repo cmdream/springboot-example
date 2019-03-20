@@ -9,6 +9,9 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 
 @Slf4j
@@ -53,8 +56,22 @@ public class TokenInterceptor implements HandlerInterceptor {
                 response.setHeader("token", "sessionTimeout");
             }
         }
-        //打印信息
+
+        // 打印信息
         String referer = request.getHeader("Referer");
+        if (referer == null) {
+            referer = "new";
+        }
+        referer = referer.replaceAll("^[^/]+//[^/]+", "");
+        System.out.println("【请求地址】: " + request.getRequestURI() + "  " + request.getMethod());
+        // 排序输出参数[名称:值]
+        Iterator<Map.Entry> it = new TreeMap(request.getParameterMap()).entrySet().iterator();
+        int i = 1;
+        while (it.hasNext()) {
+            Map.Entry<String, String[]> me = it.next();
+            System.out.println("【请求参数" + i + "】: " + "【" + me.getKey() + "】" + " 【值】 :【" + me.getValue()[0] + "】");
+            i++;
+        }
         return true;
     }
 }
